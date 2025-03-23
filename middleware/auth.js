@@ -15,8 +15,7 @@ const verify_token = async (req, res, next) => {
   try {
     const token_verify = await jwt.verify(token, config.secret_key);
     req.user = token_verify;
-    // console.log(User);
-    // console.log(token_verify);
+
     const user = await User.findById(token_verify);
     
     if (!user) {

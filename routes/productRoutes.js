@@ -14,18 +14,28 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const router = express.Router();
 
-router.post('/add-product', auth, upload.single('logo'),
+const optionalUpload = (req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    upload.single('logo')(req, res, next);
+  } else {
+    next();
+  }
+};
+
+router.post('/add-product', auth, 
+  // upload.single('logo'),
+  optionalUpload,
   body('name').not().isEmpty().trim().escape(),
   body('sku').not().isEmpty(),
   body('description').not().isEmpty(),
   body('category').not().isEmpty(),
-  body('assignedTo').not().isEmpty(),
+  // body('assignedTo').not().isEmpty(),
   errors,
   product_controller.add_product
 );
 
 router.route('/product/:id')
-  .patch(auth, upload.single('logo'), product_controller.updateproduct)
+  .patch(auth, optionalUpload, product_controller.updateproduct)
   .get(auth, product_controller.getproduct);
 
 router.delete('/product/:id/:source', auth, product_controller.deleteproduct);

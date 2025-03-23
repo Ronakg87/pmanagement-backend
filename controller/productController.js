@@ -5,7 +5,7 @@ const add_product = async (req, res) => {
   try {
       // Ensure assignedTo is saved as an array of strings
       let assignedTo = req.body.assignedTo;
-
+      
       // Check if assignedTo is a stringified array and parse it
       if (typeof assignedTo === 'string') {
           try {
@@ -15,18 +15,24 @@ const add_product = async (req, res) => {
               return res.status(400).send({ success: false, msg: "Invalid assignedTo format" });
           }
       }
-
+      
       // Ensure it is always saved as an array
-      if (!Array.isArray(assignedTo)) {
+      if (!Array.isArray(assignedTo) && assignedTo !== undefined) {
           assignedTo = [assignedTo];
       }
 
+      if(assignedTo === undefined){
+        assignedTo = [];
+      }
+      
+      const logo = req.file ? req.file.filename : null;
+      
       const product = new Product({
           name: req.body.name,
           sku: req.body.sku,
           description: req.body.description,
           category: req.body.category,
-          logo: req.file.filename,
+          logo: logo,
           source: req.user.role,
           user_id: req.user._id,
           assignedTo: assignedTo
@@ -71,13 +77,8 @@ const getproduct = async (req, res) => {
   const id = req.params.id;
 
   try {
-    // if(req.user._id != id){
-    //   return res.status(200).send({success: true, msg:"Authrization token is not matched."});
-    // }
   
-    // const userdata = await Product.findById({_id:id});
     const productdata = await Product.findById({ _id:id });
-    // console.log(productdata);
     if(productdata.length === 0){
       res.status(200).send({success: true, msg:"No Data Found.", data: productdata});
     }
@@ -91,10 +92,6 @@ const updateproduct = async (req, res) =>{
   const pid = req.params.id;
 
   try {
-    // if(req.user._id != pid){
-    //   return res.status(200).send({success: true, msg:"Authrization token is not matched."});
-    // }
-
     if (!mongoose.isValidObjectId(pid)) {
       return res.status(404).json({success: false, message: "Please provide valid Product id"});
     }
@@ -113,6 +110,7 @@ const updateproduct = async (req, res) =>{
     let assignedTo = req.body.assignedTo;
 
     let logo = productdata.logo; // Use existing logo by default
+   
     if (req.file) {
       // Check if a new logo file was uploaded
       logo = req.file.filename; // Assuming `req.file.filename` contains the uploaded file name
@@ -155,11 +153,7 @@ const updateproduct = async (req, res) =>{
         },
         { new: true }
       );
-    // const updatedata = await Product.findOneAndUpdate({ _id:pid, assignedTo: req.user._id }, {
-    //   $set: {
-    //     name: new_pname, description: new_pdescription, category: new_category, assignedTo: new_assignedTo, source: new_source,
-    //   }},{new: true});
-    
+  
     if(updatedProduct) res.status(200).json({success: true, msg:`Product Updated Successfully.`});
     
   } catch (error) {
@@ -174,7 +168,7 @@ const getallproducts = async (req, res) => {
     if(role === "admin"){
     allProductDetails = await Product.find();
     }else{
-      allProductDetails = await Product.find({assignedTo: req.user._id});
+      allProductDetails = await Product.find({user_id: req.user._id});
     }
     // if(allUserDetails){
       res.status(200).send({success:true,msg:"All Products Data has been Fetched Successfully.", result:allProductDetails});

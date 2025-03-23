@@ -20,7 +20,7 @@ const product = mongoose.Schema({
     },
     logo:{
         type:String,
-        required:true
+        // required:true
     },
     user_id:{
         type:mongoose.Schema.ObjectId,

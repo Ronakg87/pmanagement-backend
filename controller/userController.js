@@ -145,85 +145,6 @@ const update_password = async (req, res) => {
   }
 };
 
-// const forget_password = async (req, res) => {
-//   try {
-//     const email = req.body.email;
-    
-//     if(email){
-//       const userData = await User.findOne({ email: email });
-//       if (userData) {
-//         // const randomString = randomstring.generate();
-//         // const data = await User.updateOne(
-//         //   { email: email },
-//         //   { $set: { token: randomString } }
-//         // );
-//         sendResetPasswordMail(userData.name, userData.email, userData._id);
-//         res
-//           .status(200)
-//           .send({ success: true, msg: "Please check your mailbox." });
-//       } else {
-//         res
-//           .status(200)
-//           .send({ success: true, msg: "This email is does not exists." });
-//       }
-//     } else{
-//       res.status(400).send({ success: true, msg: "Please Enter a Email." });
-//     }
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// };
-
-// const reset_password = async (req, res) => {
-//   try {
-//     // const token = req.query.token;
-//     const user_id = req.query.id;
-//     console.log(user_id);
-
-//     const udata = await User.findOne({ _id: user_id });
-    
-//     if (udata) {
-//       const password = req.body.password;
-//       const new_password = await securepassword(password);
-//       const userdata = await User.findByIdAndUpdate(
-//         { _id: udata._id },
-//         { $set: { password: new_password, token: "" } },
-//         { new: true }
-//       );
-
-//       res
-//         .status(200)
-//         .send({
-//           success: true,
-//           msg: "Your password has been reset successfully.",
-//           data: userdata,
-//         });
-//     } else {
-//       res
-//         .status(200)
-//         .send({ success: true, msg: "This token has been expired." });
-//     }
-//   } catch (error) {
-//     res.status(400).send(error.message);
-//   }
-// };
-
-// const deleteuser = async (req, res) => {
-//     const deleteid = req.params.id;
-    
-//     try {
-//       if(req.user._id != deleteid){
-//         return res.status(200).send({success: true, msg:"Authrization token is not matched."});
-//       }
-      
-//       const del_user = await User.findByIdAndRemove({_id:deleteid});
-//       res.status(200).send({ success: true,  msg:"User has deleted successfully."});
-      
-//     } catch (error) {
-//       res.status(400).send({success: false, msg: error.message});
-//     }
-// }
-
 const getuser = async (req, res) => {
   const id = req.params.id;
 
@@ -269,15 +190,6 @@ const updateuser = async (req, res) =>{
 const getAllUsers = async (req, res) => {
 
   try {
-    // const allUserDetails = User.find({}, function(err, usersData){
-    //   if(err)
-    //     console.log(err);
-    //   if(usersData){
-    //     // console.log("Users count : " + usersData.length);
-    //     // console.log(usersData);
-    //     res.status(200).send({success:true,msg:"All Users Data has Fetched Successfully.", result:usersData});
-    //   }  
-    // });
     const allUserDetails = await User.find({_id:{$ne: req.user._id}}, 'name email role');
     res.status(200).send({success:true,msg:"All Users Data has been Fetched Successfully.", result:allUserDetails});
 
@@ -296,14 +208,10 @@ const getuserbyids = async (req, res) => {
       return res.status(400).json({ message: "Invalid user IDs" });
     }
 
-    // const users = await User.find({ _id: { $in: ids } });
     const users = await User.find(
       { _id: { $in: ids } },
       'name email role' // Only include these fields
     );
-    // const users = await User.find(
-    //   { _id: { $in: ids } }
-    // ).select('-password');
 
     if (users.length === 0) {
       return res.status(404).json({ message: "No user found" });
@@ -324,9 +232,6 @@ module.exports = {
   securepassword,
   auth,
   update_password,
-  // forget_password,
-  // reset_password,
-  // deleteuser,
   getuser,
   getuserbyids,
   updateuser,
